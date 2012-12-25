@@ -1,0 +1,3 @@
+mam usek DNA rozsekany na kousky, chci ho z tech kousku rekontruovat - chci co nejkratsi retezec obashujici vsechny dane podretezce (s moznymi chybami)
+
+pro spasovavani pouziju overlap alignment, tj. jak moc mam retezce vuci sobe posunout, aby prefix jednoho byl nejlepsim sufixem druheho... tabulka dynamickeho programovani jako o globalniho alignmentu... porovnavam retezce u, v... u jsou radky, v jsou sloupce... do 0. sloupce dam 0, do 0. radku dam 1*d, 2*d, 3*d... pri zjistovani zpetne cesty skoncim, jakmile se dostanu do 0. sloupce - tam je misto, kde zacina sufix u, ktery chci pouzit

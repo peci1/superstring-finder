@@ -1,6 +1,9 @@
 /**  */
 package cz.cuni.mff.peckam.bioinf.superstring;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cz.cuni.mff.peckam.bioinf.alignments.OverlapAlignmentProblem;
 
 /**
@@ -16,23 +19,25 @@ public class SuperstringFinder
      */
     public static void main(String[] args)
     {
-        final OverlapAlignmentProblem problem = new OverlapAlignmentProblem(boxArray("pawheae".toCharArray()),
-                boxArray("heagawghee".toCharArray()), 4, -1, -5);
+        final OverlapAlignmentProblem problem = new OverlapAlignmentProblem(stringToCharList("pawheae"),
+                stringToCharList("heagawghee"), 4, -1, -5);
         System.out.println("score: " + problem.compute());
         System.out.println(problem.traceback());
     }
 
     /**
-     * Box a char[].
+     * Convert a string to a list of its characters.
      * 
-     * @param array The array to box.
-     * @return The correcponding Character[].
+     * @param s String to convert.
+     * @return List of the string's characters.
      */
-    private static Character[] boxArray(char[] array)
+    private static List<Character> stringToCharList(String s)
     {
-        Character[] result = new Character[array.length];
-        for (int i = 0; i < array.length; i++)
-            result[i] = array[i];
+        final List<Character> result = new ArrayList<>();
+        for (int i = 0; i < s.length(); i++) {
+            result.add(s.charAt(i));
+        }
+
         return result;
     }
 }

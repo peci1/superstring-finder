@@ -1,5 +1,7 @@
 package cz.cuni.mff.peckam.bioinf.alignments;
 
+import java.util.List;
+
 /**
  * Overlap sequence alignment.
  * 
@@ -20,7 +22,7 @@ public class OverlapAlignmentProblem extends AlignmentProblem
      * @param mismatch Penalty for mismatch compounds. Negative value.
      * @param gap Penalty for gap. Negative value.
      */
-    public OverlapAlignmentProblem(Character[] seq1, Character[] seq2, int match, int mismatch, int gap)
+    public OverlapAlignmentProblem(List<Character> seq1, List<Character> seq2, int match, int mismatch, int gap)
     {
         super(seq1, seq2, new LinearScoringMatrix<Character>(match, mismatch, gap));
     }
@@ -50,7 +52,7 @@ public class OverlapAlignmentProblem extends AlignmentProblem
         final int i = coords.elem1, j = coords.elem2;
 
         // the -1 in seq1/2 indices is due to the zeroth initialization column and row
-        final int seq1ToSeq2 = valuesTable[i - 1][j - 1] + scoringMatrix.getScore(seq1[i - 1], seq2[j - 1]);
+        final int seq1ToSeq2 = valuesTable[i - 1][j - 1] + scoringMatrix.getScore(seq1.get(i - 1), seq2.get(j - 1));
         final int seq1ToGap = valuesTable[i - 1][j] + scoringMatrix.getGapExtendPenalty();
         final int gapToSeq2 = valuesTable[i][j - 1] + scoringMatrix.getGapExtendPenalty();
 

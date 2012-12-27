@@ -1,6 +1,5 @@
 package cz.cuni.mff.peckam.bioinf.alignments;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 /**  */
@@ -16,9 +15,9 @@ public abstract class AlignmentProblem extends DynamicProgrammingProblem<Integer
 {
 
     /** The first sequence. */
-    protected final Character[]              seq1;
+    protected final List<Character>          seq1;
     /** The second sequence. */
-    protected final Character[]              seq2;
+    protected final List<Character>          seq2;
     /** The scoring matrix. */
     protected final ScoringMatrix<Character> scoringMatrix;
     
@@ -27,10 +26,10 @@ public abstract class AlignmentProblem extends DynamicProgrammingProblem<Integer
      * @param seq2 The second sequence.
      * @param scoringMatrix The scoring matrix.
      */
-    public AlignmentProblem(Character[] seq1, Character[] seq2, ScoringMatrix<Character> scoringMatrix)
+    public AlignmentProblem(List<Character> seq1, List<Character> seq2, ScoringMatrix<Character> scoringMatrix)
     {
         // +1 for the zeroth initialization row and column
-        super(seq1.length + 1, seq2.length + 1);
+        super(seq1.size() + 1, seq2.size() + 1);
 
         this.seq1 = seq1;
         this.seq2 = seq2;
@@ -59,8 +58,8 @@ public abstract class AlignmentProblem extends DynamicProgrammingProblem<Integer
         final StringBuilder result = new StringBuilder();
 
         Tuple<Integer> previous = null;
-        final Iterator<?> seq1it = Arrays.asList(seq1).listIterator(Math.max(0, trace.get(0).elem1));
-        final Iterator<?> seq2it = Arrays.asList(seq2).listIterator(Math.max(0, trace.get(0).elem2));
+        final Iterator<?> seq1it = seq1.listIterator(Math.max(0, trace.get(0).elem1));
+        final Iterator<?> seq2it = seq2.listIterator(Math.max(0, trace.get(0).elem2));
 
         for (Tuple<Integer> coords : trace) {
             // we wanna skip the first iteration

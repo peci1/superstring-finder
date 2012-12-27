@@ -42,8 +42,6 @@ public class OverlapAlignmentProblem extends AlignmentProblem
             if (j > 0)
                 tracebackTable[0][j] = new Tuple<>(0, j - 1);
         }
-
-        bestScoreCoords = new Tuple<>(0, 0);
     }
 
     @Override
@@ -68,16 +66,22 @@ public class OverlapAlignmentProblem extends AlignmentProblem
             max = gapToSeq2;
         }
 
-        if (max > valuesTable[bestScoreCoords.elem1][bestScoreCoords.elem2])
-            bestScoreCoords = new Tuple<>(i, j);
-
         return max;
     }
 
     @Override
     protected Tuple<Integer> getTracebackLastCoords()
     {
-        // TODO in overlap alignment, the traceback has to start in the last row!
+        if (bestScoreCoords == null) {
+            int bestScore = Integer.MIN_VALUE;
+            for (int i = 0; i < height; i++) {
+                if (valuesTable[width - 1][i] > bestScore) {
+                    bestScoreCoords = new Tuple<>(width - 1, i);
+                    bestScore = valuesTable[width - 1][i];
+                }
+            }
+        }
+
         return bestScoreCoords;
     }
 

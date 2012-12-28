@@ -33,6 +33,8 @@ public class SuperstringFinder
         // stringToCharList("bpaf"), 4, -1, -5);
         final AlignmentResult result = problem.compute();
         System.out.println(result);
+        System.out.println(result.doesSeq1ContainSeq2());
+        System.out.println(result.mergeSeq2ToRightOfSeq1());
     }
 
     /**

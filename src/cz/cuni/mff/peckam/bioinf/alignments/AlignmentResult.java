@@ -2,6 +2,7 @@
 package cz.cuni.mff.peckam.bioinf.alignments;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -63,6 +64,82 @@ public class AlignmentResult
     public int getScore()
     {
         return score;
+    }
+
+    /**
+     * @return True if seq1 contains seq2 as its part (with indels allowed).
+     */
+    public boolean doesSeq1ContainSeq2()
+    {
+        final int start1 = traceback.get(0).elem1;
+        final int start2 = traceback.get(0).elem2;
+
+        final int end1 = traceback.get(traceback.size()-1).elem1;
+        final int end2 = traceback.get(traceback.size()-1).elem2;
+        
+        if (end1 < seq1.size() - 1 && start1 > 0) {
+            return true;
+        } else if (start1 > 0) {
+            return end2 == seq2.size() - 1;
+        } else if (end1 < seq1.size() - 1) {
+            return start2 == 0;
+        } else {
+            return start2 == 0 && end2 == seq2.size() - 1;
+        }
+    }
+    
+    /**
+     * Append seq2 after seq1 according to the alignment. If <code>{@link #doesSeq1ContainSeq2()} == true</code>, this
+     * method does nothing.
+     * <p>
+     * Beware! This function alters the list provided to the result constructor, so subsequent calls of other methods on
+     * this object would not be a good idea.
+     * 
+     * @return The first sequence with the second one appended.
+     */
+    public List<Character> mergeSeq2ToRightOfSeq1()
+    {
+        // nothing to append
+        if (doesSeq1ContainSeq2())
+            return seq1;
+
+        final ResultWalkingEventHandler handler = new ResultWalkingEventHandler() {
+            /** The characters of seq2 to append. */
+            private List<Character> toAppend = new LinkedList<>();
+
+            @Override
+            public void afterAlignment(Character seq1Char, Character seq2Char)
+            {
+                if (seq2Char != null && seq1Char == null)
+                    toAppend.add(seq2Char);
+            }
+
+            @SuppressWarnings("synthetic-access")
+            @Override
+            public void completed()
+            {
+                seq1.addAll(toAppend);
+            }
+
+            @Override
+            public void init()
+            {
+            }
+
+            @Override
+            public void inAlignment(Character seq1Char, Character seq2Char)
+            {
+            }
+
+            @Override
+            public void beforeAlignment(Character seq1Char, Character seq2Char)
+            {
+            }
+        };
+
+        walkResult(handler);
+
+        return seq1;
     }
 
     /**

@@ -63,6 +63,7 @@ public abstract class AlignmentProblem extends DynamicProgrammingProblem<Integer
 
         for (Tuple<Integer> coords : trace) {
             // we wanna skip the first iteration
+            // FIXME sometimes we don't wanna skip it (if it starts from the beginning of seq1?)
             if (previous == null) {
                 previous = coords;
                 continue;

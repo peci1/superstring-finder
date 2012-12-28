@@ -14,7 +14,8 @@ public class OverlapAlignmentProblem extends AlignmentProblem
     private Tuple<Integer> bestScoreCoords = null;
 
     /**
-     * Find the best alignment which contains the end of the first sequence and the start of the second sequence.
+     * Find the best alignment which contains the end of the first sequence and the start of the second sequence (or one
+     * sequence is completely contained in the other).
      * 
      * @param seq1 The first sequence.
      * @param seq2 The second sequence.
@@ -38,11 +39,10 @@ public class OverlapAlignmentProblem extends AlignmentProblem
                 tracebackTable[i][0] = new Tuple<>(i - 1, 0);
         }
 
-        for (int j = 0; j < height; j++) {
-            valuesTable[0][j] = j * scoringMatrix.getGapExtendPenalty();
-
-            if (j > 0)
-                tracebackTable[0][j] = new Tuple<>(0, j - 1);
+        // j = 1, because position (0,0) has already been set
+        for (int j = 1; j < height; j++) {
+            valuesTable[0][j] = -Integer.MAX_VALUE / 2;// j * scoringMatrix.getGapExtendPenalty();
+            tracebackTable[0][j] = new Tuple<>(0, j - 1);
         }
     }
 
@@ -74,12 +74,19 @@ public class OverlapAlignmentProblem extends AlignmentProblem
     @Override
     protected Tuple<Integer> getTracebackLastCoords()
     {
+        // we start the traceback at the end of any word
         if (bestScoreCoords == null) {
             int bestScore = Integer.MIN_VALUE;
             for (int i = 0; i < height; i++) {
                 if (valuesTable[width - 1][i] > bestScore) {
                     bestScoreCoords = new Tuple<>(width - 1, i);
                     bestScore = valuesTable[width - 1][i];
+                }
+            }
+            for (int i = 0; i < width; i++) {
+                if (valuesTable[i][height - 1] > bestScore) {
+                    bestScoreCoords = new Tuple<>(i, height - 1);
+                    bestScore = valuesTable[i][height - 1];
                 }
             }
         }
@@ -90,6 +97,6 @@ public class OverlapAlignmentProblem extends AlignmentProblem
     @Override
     protected boolean shouldTracebackStop(Tuple<Integer> coords)
     {
-        return coords == null || coords.equals(getCoordsAfterInit()) || valuesTable[coords.elem1][coords.elem2] == 0;
+        return coords == null || coords.equals(getCoordsAfterInit()) || coords.elem2 == 0;
     }
 }

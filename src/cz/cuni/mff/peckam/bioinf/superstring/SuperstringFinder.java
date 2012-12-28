@@ -21,6 +21,15 @@ public class SuperstringFinder
     {
         final OverlapAlignmentProblem problem = new OverlapAlignmentProblem(stringToCharList("pawheae"),
                 stringToCharList("heagawghee"), 4, -1, -5);
+        // final OverlapAlignmentProblem problem = new OverlapAlignmentProblem(stringToCharList("wheaelsder"),
+        // stringToCharList("pawheae"), 4, -1, -5);
+        // final OverlapAlignmentProblem problem = new
+        // OverlapAlignmentProblem(stringToCharList("aaaaaaaaaaabbbbbaaaaaa"),
+        // stringToCharList("cbbbae"), 4, -1, -5);
+        // final OverlapAlignmentProblem problem = new OverlapAlignmentProblem(stringToCharList("abccccccc"),
+        // stringToCharList("ab"), 4, -1, -5);
+        // final OverlapAlignmentProblem problem = new OverlapAlignmentProblem(stringToCharList("abpafpaf"),
+        // stringToCharList("bpaf"), 4, -1, -5);
         System.out.println("score: " + problem.compute());
         System.out.println(problem.traceback());
     }

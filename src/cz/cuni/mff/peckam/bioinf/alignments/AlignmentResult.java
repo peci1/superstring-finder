@@ -65,6 +65,54 @@ public class AlignmentResult
         return score;
     }
 
+    /**
+     * @param handler Event handler for walking the result.
+     */
+    private void walkResult(ResultWalkingEventHandler handler)
+    {
+        handler.init();
+
+        final int start1 = traceback.get(0).elem1;
+        final int start2 = traceback.get(0).elem2;
+        final int maxStart = Math.max(start1, start2);
+
+        final Iterator<Character> seq1it = seq1.iterator();
+        final Iterator<Character> seq2it = seq2.iterator();
+
+        for (int i = 0; i < maxStart; i++) {
+            final Character seq1Char = (i < maxStart - start1) ? null : seq1it.next();
+            final Character seq2Char = (i < maxStart - start2) ? null : seq2it.next();
+            handler.beforeAlignment(seq1Char, seq2Char);
+        }
+
+        Tuple<Integer> previous = null;
+
+        for (Tuple<Integer> coords : traceback) {
+            // we wanna skip the first iteration
+            // FIXME sometimes we don't wanna skip it (if it starts from the beginning of seq1?)
+            if (previous == null) {
+                previous = coords;
+                continue;
+            }
+
+            final Character seq1Char = (coords.elem1 == previous.elem1) ? null : seq1it.next();
+            final Character seq2Char = (coords.elem2 == previous.elem2) ? null : seq2it.next();
+
+            handler.inAlignment(seq1Char, seq2Char);
+
+            previous = coords;
+        }
+
+        while (seq1it.hasNext() || seq2it.hasNext()) {
+            final Character seq1Char = seq1it.hasNext() ? seq1it.next() : null;
+            final Character seq2Char = seq2it.hasNext() ? seq2it.next() : null;
+
+            handler.afterAlignment(seq1Char, seq2Char);
+        }
+
+        handler.completed();
+    }
+
     @Override
     public String toString()
     {
@@ -75,61 +123,50 @@ public class AlignmentResult
 
             resultTop.append("Score: ").append(score).append("\n");
 
-            final int start1 = traceback.get(0).elem1;
-            final int start2 = traceback.get(0).elem2;
-            final int maxStart = Math.max(start1, start2);
+            final ResultWalkingEventHandler handler = new ResultWalkingEventHandler() {
 
-            for (int i = 0; i < maxStart; i++) {
-                resultTop.append((i < maxStart - start1) ? " " : seq1.get(i - (maxStart - start1)));
-                resultMiddle.append(" ");
-                resultBottom.append((i < maxStart - start2) ? " " : seq2.get(i - (maxStart - start2)));
-            }
-
-            Tuple<Integer> previous = null;
-            final Iterator<?> seq1it = seq1.listIterator(start1);
-            final Iterator<?> seq2it = seq2.listIterator(start2);
-
-            for (Tuple<Integer> coords : traceback) {
-                // we wanna skip the first iteration
-                // FIXME sometimes we don't wanna skip it (if it starts from the beginning of seq1?)
-                if (previous == null) {
-                    previous = coords;
-                    continue;
+                @Override
+                public void init()
+                {
                 }
 
-                boolean wasIndel = false;
-                if (coords.elem1 == previous.elem1) {
-                    resultTop.append("-");
-                    resultMiddle.append("-");
-                    wasIndel = true;
-                } else {
-                    resultTop.append(seq1it.next());
+                @Override
+                public void completed()
+                {
                 }
 
-                if (coords.elem2 == previous.elem2) {
-                    resultBottom.append("-");
-                    resultMiddle.append("-");
-                    wasIndel = true;
-                } else {
-                    resultBottom.append(seq2it.next());
+                @Override
+                public void beforeAlignment(Character seq1Char, Character seq2Char)
+                {
+                    resultTop.append(seq1Char != null ? seq1Char : " ");
+                    resultMiddle.append(" ");
+                    resultBottom.append(seq2Char != null ? seq2Char : " ");
                 }
 
-                if (!wasIndel) {
-                    if (seq1.get(coords.elem1 - 1).equals(seq2.get(coords.elem2 - 1))) {
-                        resultMiddle.append("|");
+                @Override
+                public void inAlignment(Character seq1Char, Character seq2Char)
+                {
+                    resultTop.append(seq1Char != null ? seq1Char : "-");
+
+                    if (seq1Char != null && seq2Char != null) {
+                        resultMiddle.append(seq1Char.equals(seq2Char) ? "|" : "x");
                     } else {
-                        resultMiddle.append("x");
+                        resultMiddle.append("-");
                     }
+
+                    resultBottom.append(seq2Char != null ? seq2Char : "-");
+
                 }
 
-                previous = coords;
-            }
-
-            while (seq1it.hasNext())
-                resultTop.append(seq1it.next());
-
-            while (seq2it.hasNext())
-                resultBottom.append(seq2it.next());
+                @Override
+                public void afterAlignment(Character seq1Char, Character seq2Char)
+                {
+                    resultTop.append(seq1Char != null ? seq1Char : " ");
+                    resultMiddle.append(" ");
+                    resultBottom.append(seq2Char != null ? seq2Char : " ");
+                }
+            };
+            walkResult(handler);
 
             resultTop.append("\n");
             resultMiddle.append("\n");
@@ -137,5 +174,49 @@ public class AlignmentResult
             toStringCached = resultTop.append(resultMiddle).append(resultBottom).toString();
         }
         return toStringCached;
+    }
+
+    /**
+     * Handles events when walking through the result of alignment.
+     * 
+     * @author Martin Pecka
+     */
+    private interface ResultWalkingEventHandler
+    {
+
+        /**
+         * Initialize the handler.
+         */
+        void init();
+
+        /**
+         * The walkthrough has been completed. Shutdown code.
+         */
+        void completed();
+
+        /**
+         * Walking a part before the start of the alignment.
+         * 
+         * @param seq1Char Character in the first sequence, or <code>null</code> if the sequence has not begun yet.
+         * @param seq2Char Character in the second sequence, or <code>null</code> if the sequence has not begun yet.
+         */
+        void beforeAlignment(Character seq1Char, Character seq2Char);
+
+        /**
+         * Walking the alignment part.
+         * 
+         * @param seq1Char Character in the first sequence, or <code>null</code> for a gap.
+         * @param seq2Char Character in the second sequence, or <code>null</code> for a gap.
+         */
+        void inAlignment(Character seq1Char, Character seq2Char);
+
+        /**
+         * Walking a part after the end of the alignment.
+         * 
+         * @param seq1Char Character in the first sequence, or <code>null</code> if the sequence has already ended.
+         * @param seq2Char Character in the second sequence, or <code>null</code> if the sequence has already ended.
+         */
+        void afterAlignment(Character seq1Char, Character seq2Char);
+
     }
 }

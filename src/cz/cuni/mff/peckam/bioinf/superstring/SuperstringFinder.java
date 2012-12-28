@@ -4,6 +4,7 @@ package cz.cuni.mff.peckam.bioinf.superstring;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.cuni.mff.peckam.bioinf.alignments.AlignmentResult;
 import cz.cuni.mff.peckam.bioinf.alignments.OverlapAlignmentProblem;
 
 /**
@@ -30,8 +31,8 @@ public class SuperstringFinder
         // stringToCharList("ab"), 4, -1, -5);
         // final OverlapAlignmentProblem problem = new OverlapAlignmentProblem(stringToCharList("abpafpaf"),
         // stringToCharList("bpaf"), 4, -1, -5);
-        System.out.println("score: " + problem.compute());
-        System.out.println(problem.traceback());
+        final AlignmentResult result = problem.compute();
+        System.out.println(result);
     }
 
     /**

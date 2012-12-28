@@ -55,11 +55,24 @@ public abstract class AlignmentProblem extends DynamicProgrammingProblem<Integer
     public String traceback()
     {
         final List<Tuple<Integer>> trace = traceback(getTracebackLastCoords());
-        final StringBuilder result = new StringBuilder();
+
+        final StringBuilder resultTop = new StringBuilder();
+        final StringBuilder resultMiddle = new StringBuilder();
+        final StringBuilder resultBottom = new StringBuilder();
+
+        final int start1 = trace.get(0).elem1;
+        final int start2 = trace.get(0).elem2;
+        final int maxStart = Math.max(start1, start2);
+
+        for (int i = 0; i < maxStart; i++) {
+            resultTop.append((i < maxStart - start1) ? " " : seq1.get(i - (maxStart - start1)));
+            resultMiddle.append(" ");
+            resultBottom.append((i < maxStart - start2) ? " " : seq2.get(i - (maxStart - start2)));
+        }
 
         Tuple<Integer> previous = null;
-        final Iterator<?> seq1it = seq1.listIterator(Math.max(0, trace.get(0).elem1));
-        final Iterator<?> seq2it = seq2.listIterator(Math.max(0, trace.get(0).elem2));
+        final Iterator<?> seq1it = seq1.listIterator(start1);
+        final Iterator<?> seq2it = seq2.listIterator(start2);
 
         for (Tuple<Integer> coords : trace) {
             // we wanna skip the first iteration
@@ -69,24 +82,44 @@ public abstract class AlignmentProblem extends DynamicProgrammingProblem<Integer
                 continue;
             }
 
+            boolean wasIndel = false;
             if (coords.elem1 == previous.elem1) {
-                result.append("-");
+                resultTop.append("-");
+                resultMiddle.append("-");
+                wasIndel = true;
             } else {
-                result.append(seq1it.next());
+                resultTop.append(seq1it.next());
             }
 
             if (coords.elem2 == previous.elem2) {
-                result.append("-");
+                resultBottom.append("-");
+                resultMiddle.append("-");
+                wasIndel = true;
             } else {
-                result.append(seq2it.next());
+                resultBottom.append(seq2it.next());
             }
 
-            result.append("\n");
+            if (!wasIndel) {
+                if (seq1.get(coords.elem1 - 1).equals(seq2.get(coords.elem2 - 1))) {
+                    resultMiddle.append("|");
+                } else {
+                    resultMiddle.append("x");
+                }
+            }
 
             previous = coords;
         }
 
-        return result.toString();
+        while (seq1it.hasNext())
+            resultTop.append(seq1it.next());
+
+        while (seq2it.hasNext())
+            resultBottom.append(seq2it.next());
+
+        resultTop.append("\n");
+        resultMiddle.append("\n");
+
+        return resultTop.append(resultMiddle).append(resultBottom).toString();
     }
 
     @Override

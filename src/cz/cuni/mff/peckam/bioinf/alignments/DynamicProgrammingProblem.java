@@ -55,15 +55,15 @@ public abstract class DynamicProgrammingProblem<T extends Number, Result>
 
         Tuple<Integer> coords = getCoordsAfterInit();
 
-        final int iterations = width * height;
+//        final int iterations = width * height;
 
-        for (int i = 0; coords.elem1 < width && coords.elem2 < height; i++) {
+        for (/* int i = 0 */; coords.elem1 < width && coords.elem2 < height; /* i++ */) {
             valuesTable[coords.elem1][coords.elem2] = computeValueAndSaveTraceback(coords);
 
             coords = nextCoords(coords);
 
-            if ((10 * i) / iterations != (10 * (i - 1)) / iterations)
-                System.err.println((100 * i) / iterations + "%");
+//            if ((10 * i) / iterations != (10 * (i - 1)) / iterations)
+//                System.err.println((100 * i) / iterations + "%");
         }
 
         System.gc();

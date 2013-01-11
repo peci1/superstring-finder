@@ -14,7 +14,7 @@ public class OverlapAlignmentProblem extends AlignmentProblem
     private Tuple<Integer> bestScoreCoords = null;
 
     /**
-     * Find the best alignment which contains the end of the first sequence and the start of the second sequence (or one
+     * Find the best alignment which contains the end of the one sequence and the start of the other sequence (or one
      * sequence is completely contained in the other).
      * 
      * @param seq1 The first sequence.
@@ -32,7 +32,7 @@ public class OverlapAlignmentProblem extends AlignmentProblem
     protected void init()
     {
         for (int i = 0; i < width; i++) {
-            // 0 due to overlap alignment - we don't penalize gaps at the start of the second sequence
+            // 0 due to overlap alignment - we don't penalize gaps at the start of a sequence
             valuesTable[i][0] = 0;
 
             if (i > 0)
@@ -41,7 +41,8 @@ public class OverlapAlignmentProblem extends AlignmentProblem
 
         // j = 1, because position (0,0) has already been set
         for (int j = 1; j < height; j++) {
-            valuesTable[0][j] = -Integer.MAX_VALUE / 2;// j * scoringMatrix.getGapExtendPenalty();
+            // 0 due to overlap alignment - we don't penalize gaps at the start of a sequence
+            valuesTable[0][j] = 0;
             tracebackTable[0][j] = new Tuple<>(0, j - 1);
         }
     }
@@ -97,6 +98,6 @@ public class OverlapAlignmentProblem extends AlignmentProblem
     @Override
     protected boolean shouldTracebackStop(Tuple<Integer> coords)
     {
-        return coords == null || coords.equals(getCoordsAfterInit()) || coords.elem2 == 0;
+        return coords == null || coords.equals(getCoordsAfterInit()) || coords.elem1 == 0 || coords.elem2 == 0;
     }
 }

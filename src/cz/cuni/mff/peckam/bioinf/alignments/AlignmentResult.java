@@ -89,21 +89,23 @@ public class AlignmentResult
     }
     
     /**
-     * Append seq2 after seq1 according to the alignment. If <code>{@link #doesSeq1ContainSeq2()} == true</code>, this
+     * Merge seq2 to seq1 according to the alignment. If <code>{@link #doesSeq1ContainSeq2()} == true</code>, this
      * method does nothing.
      * <p>
      * Beware! This function alters the list provided to the result constructor, so subsequent calls of other methods on
      * this object would not be a good idea.
      * 
-     * @return The first sequence with the second one appended.
+     * @return The first sequence with the second one merged.
      */
-    public List<Character> mergeSeq2ToRightOfSeq1()
+    public List<Character> mergeSeq2ToSeq1()
     {
         // nothing to append
         if (doesSeq1ContainSeq2())
             return seq1;
 
         final ResultWalkingEventHandler handler = new ResultWalkingEventHandler() {
+            /** The characters of seq2 to prepend. */
+            private List<Character> toPrepend = new LinkedList<>();
             /** The characters of seq2 to append. */
             private List<Character> toAppend = new LinkedList<>();
 
@@ -114,10 +116,18 @@ public class AlignmentResult
                     toAppend.add(seq2Char);
             }
 
+            @Override
+            public void beforeAlignment(Character seq1Char, Character seq2Char)
+            {
+                if (seq2Char != null && seq1Char == null)
+                    toPrepend.add(seq2Char);
+            }
+
             @SuppressWarnings("synthetic-access")
             @Override
             public void completed()
             {
+                seq1.addAll(0, toPrepend);
                 seq1.addAll(toAppend);
             }
 
@@ -128,11 +138,6 @@ public class AlignmentResult
 
             @Override
             public void inAlignment(Character seq1Char, Character seq2Char)
-            {
-            }
-
-            @Override
-            public void beforeAlignment(Character seq1Char, Character seq2Char)
             {
             }
         };
